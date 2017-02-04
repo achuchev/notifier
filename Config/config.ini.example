@@ -1,0 +1,29 @@
+[General]
+testMode = true
+
+[Program]
+lockFileWaitSeconds = 60
+maxRunTime = 300
+sleepBetweenIterations = 3
+
+[Logging]
+level = debug
+outputHTML = false
+
+[ConnectionDataGmail]
+hostname = imap.gmail.com
+username = 
+password = 
+folder = 
+
+[ConnectionDataMtelSMTP]
+hostname = 
+username = 
+password = 
+folder = 
+
+[ConnectionDataBeepSend]
+hostname = 
+username = 
+password = 
+folder = 

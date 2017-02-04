@@ -52,12 +52,13 @@ if (Utils::isProgramRunWindow ()) {
 				$setSerevityMod->perform ( $messageDataList );
 				
 				// ::::Actions
-				
-				$emailToSmsMtel = new EmailToSmsMtelAction ( $mtelConnectionData );
-				$emailToSmsMtel->notify ( $messageDataList );
-				
+				// Send SMS if needed
 				$beepSendSms = new BeepSendSmsAction ( $beepSendSmsConnectionData );
 				$beepSendSms->notify ( $messageDataList );
+				
+				// Send Email to SMS message
+				$emailToSmsMtel = new EmailToSmsMtelAction ( $mtelConnectionData );
+				$emailToSmsMtel->notify ( $messageDataList );
 			}
 		}
 	} finally {

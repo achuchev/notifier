@@ -7,7 +7,7 @@ use Notifier\Config\Config;
 use Notifier\Config\LockFile;
 use Notifier\Data\ConnectionData;
 use Notifier\Data\MessageSeverity;
-use Notifier\Incoming\ImapGmail;
+use Notifier\Incoming\Gmail;
 use Notifier\Outgoing\EmailToSmsMtel;
 use Notifier\PolicyEngine\Then\Action\BeepSendSmsAction;
 use Notifier\PolicyEngine\Then\Action\EmailToSmsMtelAction;
@@ -18,7 +18,7 @@ use Notifier\Utils\Utils;
 require_once __DIR__ . '/Data/ConnectionData.php';
 require_once __DIR__ . '/Data/MessageSeverity.php';
 require_once __DIR__ . '/Data/MessageData.php';
-require_once __DIR__ . '/Incoming/ImapGmail.php';
+require_once __DIR__ . '/Incoming/Gmail.php';
 require_once __DIR__ . '/Config/Config.php';
 require_once __DIR__ . '/Config/LockFile.php';
 require_once __DIR__ . '/PolicyEngine/Then/Action/EmailToSmsMtelAction.php';
@@ -36,11 +36,11 @@ if (Utils::isProgramRunWindow ()) {
 		
 		while ( Utils::isProgramRunWindow () ) {
 			// processing loop
-			$imapGmail = new ImapGmail ( $gmailConnectionData );
-			$newMessageDataCount = $imapGmail->getNewMessageDataCount ();
+			$gmail = new Gmail ( $gmailConnectionData );
+			$newMessageDataCount = $gmail->getNewMessageDataCount ();
 			if ($newMessageDataCount > 0) {
 				// Get the message data
-				$messageDataList = $imapGmail->getNewMessageData ();
+				$messageDataList = $gmail->getNewMessageData ();
 				
 				// ::::Modifications
 				// Simplify the messages if they are Paradox Message data

@@ -12,25 +12,48 @@ require_once __DIR__ . '/IncomingBase.php';
 require_once __DIR__ . '/../Data/MessageData.php';
 require_once __DIR__ . '/../Logging/Logger.php';
 require_once __DIR__ . '/../Utils/Utils.php';
-class ImapGmail extends IncomingBase {
+class Gmail extends IncomingBase {
 	const GMAIL_IMAP_SERVER = "imap.gmail.com";
 	const GMAIL_IMAP_SERVER_PORT = "993";
 	private $imapFolder = NULL;
 	private $isConnected = FALSE;
 	public function getNewMessageDataCount() {
 		Logger::info ( "Getting New Message Data count from GMAIL account " . $this->connectionData->username );
+		
+		$username = urlencode ( $this->connectionData->username );
+		$handle = curl_init ();
+		$options = array (
+				CURLOPT_RETURNTRANSFER => TRUE,
+				CURLOPT_HEADER => FALSE,
+				CURLOPT_FOLLOWLOCATION => FALSE,
+				CURLOPT_SSL_VERIFYHOST => '0',
+				CURLOPT_SSL_VERIFYPEER => '1',
+				CURLOPT_SSL_VERIFYPEER => 0,
+				CURLOPT_SSL_VERIFYHOST => 0,
+				CURLOPT_USERAGENT => 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)',
+				CURLOPT_VERBOSE => FALSE,
+				CURLOPT_URL => 'https://' . $username . ':' . $this->connectionData->password . '@mail.google.com/mail/feed/atom/' . $this->connectionData->folder 
+		);
+		
+		curl_setopt_array ( $handle, $options );
+		$output = ( string ) curl_exec ( $handle );
+		$xml = simplexml_load_string ( $output );
+		if (curl_errno ( $handle )) {
+			Logger::error ( 'Could not retrive the count of new messages. Error: ' . curl_error ( $handle ) );
+		}
+		curl_close ( $handle );
+		
+		// Count the new messages
 		$unseenMessagesCount = 0;
-		try {
-			$this->connect ();
-			
-			// grab 'UNSEEN' messages only
-			$emails = imap_search ( $this->imapFolder, 'UNSEEN' );
-			$unseenMessagesCount = count ( $emails );
-			Logger::debug ( "New messages count: " . $unseenMessagesCount );
-		} catch ( Exception $ex ) {
-			// TODO: handle the exception
-			Logger::error ( 'Could not process IMAP messages. Error: ', $ex . getMessage () );
-			$this->disconnect ();
+		foreach ( $xml->entry as $entry ) {
+			Logger::debug ( "New message with subject '" . ( string ) $entry->title . "' counted." );
+			$unseenMessagesCount ++;
+		}
+		
+		if ($unseenMessagesCount > 0) {
+			Logger::debug ( "The count of new messages is " . $unseenMessagesCount );
+		} else {
+			Logger::debug ( "No new messages found." );
 		}
 		return $unseenMessagesCount;
 	}
@@ -110,11 +133,10 @@ class ImapGmail extends IncomingBase {
 		Logger::debug ( "Connected to Gmail." );
 	}
 	protected function disconnect() {
-		Logger::debug ( "Disconnecting from GMAIL..." );
 		if ($this->isConnected == FALSE) {
-			Logger::debug ( "Not connected to GMAIL. Nothing to do." );
 			return;
 		}
+		Logger::debug ( "Disconnecting from GMAIL..." );
 		// close the connection
 		imap_close ( $this->imapFolder );
 		Logger::debug ( "Disconnected from GMAIL." );

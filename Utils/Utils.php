@@ -43,17 +43,21 @@ class Utils {
 		return date ( "Y-m-d H:i:s", $timestamp );
 	}
 	public static function isProgramRunWindow() {
+		$doNotSleep = FALSE;
 		if (Utils::IsNullOrEmptyString ( self::$programStartTime )) {
 			self::$programStartTime = time ();
 			Logger::debug ( "Program started at " . self::timestampToDate ( self::$programStartTime ) );
 			self::$programEndTime = self::$programStartTime + Config::getProperty ( 'Program', 'maxRunTime' );
 			Logger::debug ( "Program will end at " . self::timestampToDate ( self::$programEndTime ) );
+			$doNotSleep = TRUE;
 		}
 		if (time () >= self::$programEndTime) {
 			Logger::debug ( "Program end time reached. Exiting." );
 			return FALSE;
 		}
-		sleep ( Config::getProperty ( 'Program', 'sleepBetweenIterations' ) );
+		if ($doNotSleep == FALSE) {
+			sleep ( Config::getProperty ( 'Program', 'sleepBetweenIterations' ) );
+		}
 		return TRUE;
 	}
 }

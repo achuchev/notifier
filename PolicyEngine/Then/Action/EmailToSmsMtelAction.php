@@ -35,8 +35,8 @@ class EmailToSmsMtelAction extends ActionBase {
 				Logger::info ( "FAKE Email (SMS) message sent to " . $recipient );
 				break;
 			}
-			
-			Logger::info ( "Sending Email (SMS) message in " . count ( $bodyParts ) . " parts to " . $recipient );
+			$bodyPartsCount = count ( $bodyParts );
+			Logger::info ( "Sending Email (SMS) message in " . $bodyPartsCount . " parts to " . $recipient );
 			foreach ( $bodyParts as $body ) {
 				Logger::debug ( "\r\n\tSender: " . $messageData->sender . "\r\n\tRecipient: " . $recipient . "\r\n\tOriginal Recipient: " . $messageData->recipient . "\r\n\tSubject: " . $messageData->subject . "\r\n\tBody: " . $body );
 				
@@ -46,8 +46,11 @@ class EmailToSmsMtelAction extends ActionBase {
 				} else {
 					throw new \Exception ( "Could not send Email (SMS) message to " . $recipient );
 				}
-				// Sleep between the send opeations. Hope that the messages will be oreder.
-				sleep ( 3 );
+				if (-- $bodyPartsCount) {
+					// This means that we are not in the last interation
+					// Sleep between the send opeations. Hope that the messages will be oreder.
+					sleep ( 3 );
+				}
 			}
 		}
 	}

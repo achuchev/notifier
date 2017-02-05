@@ -19,7 +19,7 @@ class EmailToSmsMtelAction extends ActionBase {
 	public function notify($messageDataList, $notifySeverity = MessageSeverity::Low) {
 		foreach ( $messageDataList as $messageData ) {
 			Logger::info ( "Sending Email (SMS) message." );
-			if ($messageData->severity >= $notifySeverity) {
+			if ($messageData->severity < $notifySeverity) {
 				Logger::debug ( "Skipping SMS using BeepSend as the severity is lower." );
 				continue;
 			}

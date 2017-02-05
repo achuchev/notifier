@@ -17,6 +17,7 @@ class ParadoxMessageDataSeverityMod extends ModificationBase {
 			Logger::info ( "Set Severity to Paradox Message Data" );
 			if (Utils::strStartsWith ( $messageData->subject, "Alarm" )) {
 				$messageData->severity = MessageSeverity::VeryHigh;
+				Logger::debug ( "Severity set to VeryHigh for message data with subject '" . $messageData->subject . "'" );
 			}
 		}
 	}

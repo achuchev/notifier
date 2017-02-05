@@ -25,7 +25,7 @@ class BeepSendSmsAction extends ActionBase {
 		
 		foreach ( $messageDataList as $messageData ) {
 			Logger::info ( "Sending SMS using BeepSend." );
-			if ($messageData->severity >= $notifySeverity) {
+			if ($messageData->severity < $notifySeverity) {
 				Logger::debug ( "Skipping SMS using BeepSend as the severity is lower." );
 				continue;
 			}

@@ -14,16 +14,22 @@ outputHTML = false
 hostname = imap.gmail.com
 username = 
 password = 
-folder = 
+folder = INBOX
 
 [ConnectionDataMtelSMTP]
 hostname = 
-username = 
-password = 
-folder = 
+username =
+password =
+folder =
 
 [ConnectionDataBeepSend]
-hostname = 
-username = 
-password = 
-folder = 
+hostname =
+username =
+password =
+folder =
+
+[ConnectionDataTwilio]
+hostname =
+username =
+password =
+folder =

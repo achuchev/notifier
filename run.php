@@ -2,15 +2,14 @@
 
 namespace Notifier;
 
-// error_reporting ( E_ALL );
 use Notifier\Config\Config;
 use Notifier\Config\LockFile;
 use Notifier\Data\ConnectionData;
 use Notifier\Data\MessageSeverity;
 use Notifier\Incoming\Gmail;
-use Notifier\Outgoing\EmailToSmsMtel;
 use Notifier\PolicyEngine\Then\Action\BeepSendSmsAction;
 use Notifier\PolicyEngine\Then\Action\EmailToSmsMtelAction;
+use Notifier\PolicyEngine\Then\Action\TwilioAction;
 use Notifier\PolicyEngine\Then\Modification\ParadoxMessageDataSeverityMod;
 use Notifier\PolicyEngine\Then\Modification\ParadoxMessageDataSimplifyMod;
 use Notifier\Utils\Utils;
@@ -23,6 +22,7 @@ require_once __DIR__ . '/Config/Config.php';
 require_once __DIR__ . '/Config/LockFile.php';
 require_once __DIR__ . '/PolicyEngine/Then/Action/EmailToSmsMtelAction.php';
 require_once __DIR__ . '/PolicyEngine/Then/Action/BeepSendSmsAction.php';
+require_once __DIR__ . '/PolicyEngine/Then/Action/TwilioAction.php';
 require_once __DIR__ . '/PolicyEngine/Then/Modification/ParadoxMessageDataSimplifyMod.php';
 require_once __DIR__ . '/PolicyEngine/Then/Modification/ParadoxMessageDataSeverityMod.php';
 
@@ -33,6 +33,7 @@ if (Utils::isProgramRunWindow ()) {
 		$gmailConnectionData = Config::getConfigData ( "ConnectionDataGmail" );
 		$mtelConnectionData = Config::getConfigData ( "ConnectionDataMtelSMTP" );
 		$beepSendSmsConnectionData = Config::getConfigData ( "ConnectionDataBeepSend" );
+		$twilioConnectionData = Config::getConfigData ( "ConnectionDataTwilio" );
 		
 		while ( Utils::isProgramRunWindow () ) {
 			// processing loop
@@ -52,6 +53,10 @@ if (Utils::isProgramRunWindow ()) {
 				$setSerevityMod->perform ( $messageDataList );
 				
 				// ::::Actions
+				// Make a voice call
+				$twilioVoice = new TwilioAction ( $twilioConnectionData );
+				$twilioVoice->notify ( $messageDataList );
+				
 				// Send SMS if needed
 				$beepSendSms = new BeepSendSmsAction ( $beepSendSmsConnectionData );
 				$beepSendSms->notify ( $messageDataList );

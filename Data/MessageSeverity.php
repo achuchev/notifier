@@ -3,9 +3,9 @@
 namespace Notifier\Data;
 
 abstract class MessageSeverity {
-	const VeryHigh = 0;
-	const High = 1;
+	const VeryLow = 0;
+	const Low = 1;
 	const Medium = 2;
-	const Low = 3;
-	const VeryLow = 4;
+	const High = 3;
+	const VeryHigh = 4;
 }

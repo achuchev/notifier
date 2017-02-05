@@ -4,7 +4,7 @@ testMode = true
 [Program]
 lockFileWaitSeconds = 60
 maxRunTime = 300
-sleepBetweenIterations = 3
+sleepBetweenIterations = 2
 
 [Logging]
 level = debug

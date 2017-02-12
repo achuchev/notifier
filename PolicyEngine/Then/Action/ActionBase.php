@@ -6,9 +6,7 @@ use Notifier\Data\MessageSeverity;
 
 require_once __DIR__ . '/../../../Data/MessageSeverity.php';
 abstract class ActionBase {
-	protected $connectionData;
-	public function __construct($connectionData) {
-		$this->connectionData = $connectionData;
+	public function __construct() {
 	}
 	abstract public function notify($messageData, $notifySeverity = MessageSeverity::Medium);
 }

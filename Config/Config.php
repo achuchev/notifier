@@ -3,8 +3,10 @@
 namespace Notifier\Config;
 
 use Notifier\Data\ConnectionData;
+use Notifier\Data\AccountData;
 
 require_once __DIR__ . '/../Data/ConnectionData.php';
+require_once __DIR__ . '/../Data/AccountData.php';
 class Config {
 	const CONFIG_FILE_NAME = "config.ini";
 	const CONFIG_FILE_PATH = "../../../notifier_conf/config.ini";
@@ -39,9 +41,23 @@ class Config {
 			throw new \Exception ( "Could not get property with name " . $propertyName . " from section with name " . $sectionName );
 		}
 	}
-	public static function getConfigData($sectionName) {
+	public static function getConnectionData($sectionName) {
 		$configDataSection = self::getSection ( $sectionName );
 		return new ConnectionData ( $configDataSection ['hostname'], $configDataSection ['username'], $configDataSection ['password'], $configDataSection ['folder'] );
+	}
+	public static function getAllAccountsData() {
+		$accountsAlias = Config::getProperty ( "Accounts", "aliases" );
+		$accounts = [ ];
+		foreach ( $accountsAlias as $accountAlias ) {
+			$accountDataSection = self::getSection ( $accountAlias );
+			$connectionDataSMS = self::getConnectionData ( $accountDataSection ['connectionDataSMS'] );
+			$connectionDataVoice = self::getConnectionData ( $accountDataSection ['connectionDataVoice'] );
+			$connectionDataEmail = self::getConnectionData ( $accountDataSection ['connectionDataEmail'] );
+			array_push ( $accounts, new AccountData ( $accountDataSection ['paradoxSite'], $connectionDataSMS, $connectionDataVoice, $connectionDataEmail ) );
+		}
+		return $accounts;
+	}
+	public static function getAccountConnectionData() {
 	}
 	public static function isTestMode() {
 		return self::getProperty ( "General", "testMode" );

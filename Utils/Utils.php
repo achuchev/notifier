@@ -22,6 +22,10 @@ class Utils {
 		// Function to check if string ends with substring
 		return (substr ( $string, - strlen ( $query ) ) === $query);
 	}
+	public static function strContains($string, $query) {
+		// Function to check if string ends with substring
+		return (strpos ( $string, $query ) !== false);
+	}
 	public static function preparePhoneNumber($phoneNumber) {
 		$badLeadingChars = array (
 				'0',

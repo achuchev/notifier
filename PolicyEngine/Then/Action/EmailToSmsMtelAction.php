@@ -20,12 +20,11 @@ class EmailToSmsMtelAction extends ActionBase {
 		foreach ( $messageDataList as $messageData ) {
 			Logger::info ( "Sending Email (SMS) message." );
 			if ($messageData->severity < $notifySeverity) {
-				Logger::debug ( "Skipping SMS using BeepSend as the severity is lower." );
+				Logger::debug ( "Skipping Email (SMS) message as the severity is lower." );
 				continue;
 			}
-			
 			$sender = EmailUtils::simplifyEmailAddress ( $messageData->sender );
-			$recipient = Utils::preparePhoneNumber ( $this->connectionData->username ) . self::MTEL_DOMAIN;
+			$recipient = Utils::preparePhoneNumber ( $messageData->accountData->connectionDataEmail->username ) . self::MTEL_DOMAIN;
 			$headers = 'From: ' . $sender . "\r\n" . 'Reply-To: ' . $sender . "\r\n" . 'X-Mailer: PHP/' . phpversion ();
 			
 			$maxBodyLength = EmailUtils::getMaxBodyLength ( $messageData->subject, $sender );

@@ -17,13 +17,12 @@ require_once __DIR__ . '/../../../Config/Config.php';
 require_once __DIR__ . '/../../../Data/MessageSeverity.php';
 class BeepSendSmsAction extends ActionBase {
 	public function notify($messageDataList, $notifySeverity = MessageSeverity::High) {
-		$phoneNumber = Utils::preparePhoneNumber ( $this->connectionData->username );
-		
 		$options = array (
 				'receive_dlr' => 0 
 		);
 		
 		foreach ( $messageDataList as $messageData ) {
+			$phoneNumber = Utils::preparePhoneNumber ( $messageData->accountData->connectionDataSMS->username );
 			Logger::info ( "Sending SMS using BeepSend." );
 			if ($messageData->severity < $notifySeverity) {
 				Logger::debug ( "Skipping SMS using BeepSend as the severity is lower." );
@@ -31,7 +30,7 @@ class BeepSendSmsAction extends ActionBase {
 			}
 			
 			try {
-				$client = new Client ( $this->connectionData->password );
+				$client = new Client ( $messageData->accountData->connectionDataSMS->password );
 				$text = $messageData->subject . ' ' . $messageData->body;
 				if (Config::isTestMode () == TRUE) {
 					Logger::info ( "FAKE SMS (using BeepSend) to to " . $phoneNumber );

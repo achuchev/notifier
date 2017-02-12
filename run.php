@@ -13,6 +13,8 @@ use Notifier\PolicyEngine\Then\Action\TwilioAction;
 use Notifier\PolicyEngine\Then\Modification\ParadoxMessageDataSeverityMod;
 use Notifier\PolicyEngine\Then\Modification\ParadoxMessageDataSimplifyMod;
 use Notifier\Utils\Utils;
+use Notifier\Logging\Logger;
+use Notifier\PolicyEngine\Then\Modification\ParadoxMessageSetAccountMod;
 
 require_once __DIR__ . '/Data/ConnectionData.php';
 require_once __DIR__ . '/Data/MessageSeverity.php';
@@ -25,15 +27,13 @@ require_once __DIR__ . '/PolicyEngine/Then/Action/BeepSendSmsAction.php';
 require_once __DIR__ . '/PolicyEngine/Then/Action/TwilioAction.php';
 require_once __DIR__ . '/PolicyEngine/Then/Modification/ParadoxMessageDataSimplifyMod.php';
 require_once __DIR__ . '/PolicyEngine/Then/Modification/ParadoxMessageDataSeverityMod.php';
+require_once __DIR__ . '/PolicyEngine/Then/Modification/ParadoxMessageDataSetAccountMod.php';
 
 if (Utils::isProgramRunWindow ()) {
 	try {
 		LockFile::acquire_or_die ();
 		
-		$gmailConnectionData = Config::getConfigData ( "ConnectionDataGmail" );
-		$mtelConnectionData = Config::getConfigData ( "ConnectionDataMtelSMTP" );
-		$beepSendSmsConnectionData = Config::getConfigData ( "ConnectionDataBeepSend" );
-		$twilioConnectionData = Config::getConfigData ( "ConnectionDataTwilio" );
+		$gmailConnectionData = Config::getConnectionData ( "ConnectionDataGmail" );
 		
 		while ( Utils::isProgramRunWindow () ) {
 			// processing loop
@@ -44,6 +44,15 @@ if (Utils::isProgramRunWindow ()) {
 				$messageDataList = $gmail->getNewMessageData ();
 				
 				// ::::Modifications
+				// As a first step, set the account data to the messages
+				$setAccountMod = new ParadoxMessageSetAccountMod ();
+				$messageDataList = $setAccountMod->perform ( $messageDataList );
+				
+				if (empty ( $messageDataList )) {
+					// All messages are filtered out
+					break;
+				}
+				
 				// Simplify the messages if they are Paradox Message data
 				$simplifyMod = new ParadoxMessageDataSimplifyMod ();
 				$simplifyMod->perform ( $messageDataList );
@@ -54,15 +63,15 @@ if (Utils::isProgramRunWindow ()) {
 				
 				// ::::Actions
 				// Make a voice call
-				$twilioVoice = new TwilioAction ( $twilioConnectionData );
+				$twilioVoice = new TwilioAction ();
 				$twilioVoice->notify ( $messageDataList );
 				
 				// Send SMS if needed
-				$beepSendSms = new BeepSendSmsAction ( $beepSendSmsConnectionData );
+				$beepSendSms = new BeepSendSmsAction ();
 				$beepSendSms->notify ( $messageDataList );
 				
 				// Send Email to SMS message
-				$emailToSmsMtel = new EmailToSmsMtelAction ( $mtelConnectionData );
+				$emailToSmsMtel = new EmailToSmsMtelAction ();
 				$emailToSmsMtel->notify ( $messageDataList );
 			}
 		}

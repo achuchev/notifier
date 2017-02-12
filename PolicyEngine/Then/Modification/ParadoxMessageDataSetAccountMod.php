@@ -26,8 +26,8 @@ class ParadoxMessageSetAccountMod extends ModificationBase {
 					array_push ( $filteredMessageDataList, $messageData );
 					break;
 				}
-				Logger::warning ( "Site not detected for message with subject '" . $messageData->subject . "'. The message will be skipped." );
 			}
+			Logger::warning ( "Site not detected for message with subject '" . $messageData->subject . "'. The message will be skipped." );
 		}
 		return $filteredMessageDataList;
 	}

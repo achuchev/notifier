@@ -37,11 +37,16 @@ class Gmail extends IncomingBase {
 		
 		curl_setopt_array ( $handle, $options );
 		$output = ( string ) curl_exec ( $handle );
-		$xml = simplexml_load_string ( $output );
 		if (curl_errno ( $handle )) {
 			Logger::error ( 'Could not retrive the count of new messages. Error: ' . curl_error ( $handle ) );
 		}
 		curl_close ( $handle );
+		
+		$xml = simplexml_load_string ( $output );
+		if ($xml === FALSE) {
+			Logger::error ( 'Could not parse XML output. Output: ' . $xml );
+			return 0;
+		}
 		
 		// Count the new messages
 		$unseenMessagesCount = 0;

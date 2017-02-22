@@ -12,7 +12,7 @@ class Utils {
 	private static $programEndTime = NULL;
 	public static function IsNullOrEmptyString($string) {
 		// Function for basic field validation (present and neither empty nor only white space)
-		return (! isset ( $string ) || trim ( $string ) === '');
+		return (! isset ( $string ) || (is_string ( $string ) && trim ( $string ) === ''));
 	}
 	public static function strStartsWith($string, $query) {
 		// Function to check if string starts with substring

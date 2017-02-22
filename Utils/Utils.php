@@ -11,7 +11,7 @@ class Utils {
 	public static $programStartTime = NULL;
 	private static $programEndTime = NULL;
 	public static function IsNullOrEmptyString($string) {
-		// Function for basic field validation (present and neither empty nor only white space
+		// Function for basic field validation (present and neither empty nor only white space)
 		return (! isset ( $string ) || trim ( $string ) === '');
 	}
 	public static function strStartsWith($string, $query) {

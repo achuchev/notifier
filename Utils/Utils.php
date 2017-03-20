@@ -51,7 +51,7 @@ class Utils {
 		if (Utils::IsNullOrEmptyString ( self::$programStartTime )) {
 			self::$programStartTime = time ();
 			Logger::debug ( "Program started at " . self::timestampToDate ( self::$programStartTime ) );
-			self::$programEndTime = self::$programStartTime + Config::getProperty ( 'Program', 'maxRunTime' );
+			self::$programEndTime = self::$programStartTime + Config::getMaxRunTime();
 			Logger::debug ( "Program will end at " . self::timestampToDate ( self::$programEndTime ) );
 			$doNotSleep = TRUE;
 		}

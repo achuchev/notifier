@@ -57,7 +57,8 @@ class Config {
 		}
 		return $accounts;
 	}
-	public static function getAccountConnectionData() {
+	public static function getMaxRunTime() {
+		return self::getProperty ( 'Program', 'maxRunTime' );
 	}
 	public static function isTestMode() {
 		return self::getProperty ( "General", "testMode" );

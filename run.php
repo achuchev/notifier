@@ -13,7 +13,6 @@ use Notifier\PolicyEngine\Then\Action\TwilioAction;
 use Notifier\PolicyEngine\Then\Modification\ParadoxMessageDataSeverityMod;
 use Notifier\PolicyEngine\Then\Modification\ParadoxMessageDataSimplifyMod;
 use Notifier\Utils\Utils;
-use Notifier\Logging\Logger;
 use Notifier\PolicyEngine\Then\Modification\ParadoxMessageSetAccountMod;
 
 require_once __DIR__ . '/Data/ConnectionData.php';

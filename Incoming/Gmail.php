@@ -7,11 +7,13 @@ use Notifier\Incoming\IncomingBase;
 use Notifier\Logging\Logger;
 use Notifier\Utils\Utils;
 use Notifier\Config\Config;
+use Notifier\Utils\XmlUtils;
 
 require_once __DIR__ . '/IncomingBase.php';
 require_once __DIR__ . '/../Data/MessageData.php';
 require_once __DIR__ . '/../Logging/Logger.php';
 require_once __DIR__ . '/../Utils/Utils.php';
+require_once __DIR__ . '/../Utils/XmlUtils.php';
 class Gmail extends IncomingBase {
 	const GMAIL_IMAP_SERVER = "imap.gmail.com";
 	const GMAIL_IMAP_SERVER_PORT = "993";
@@ -19,7 +21,7 @@ class Gmail extends IncomingBase {
 	private $isConnected = FALSE;
 	public function getNewMessageDataCount() {
 		Logger::info ( "Getting New Message Data count from GMAIL account " . $this->connectionData->username );
-
+		
 		$username = urlencode ( $this->connectionData->username );
 		$handle = curl_init ();
 		$options = array (
@@ -32,34 +34,46 @@ class Gmail extends IncomingBase {
 				CURLOPT_SSL_VERIFYHOST => 0,
 				CURLOPT_USERAGENT => 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)',
 				CURLOPT_VERBOSE => FALSE,
-				CURLOPT_URL => 'https://' . $username . ':' . $this->connectionData->password . '@mail.google.com/mail/feed/atom/' . $this->connectionData->folder
+				CURLOPT_URL => 'https://' . $username . ':' . $this->connectionData->password . '@mail.google.com/mail/feed/atom/' . $this->connectionData->folder 
 		);
-
+		
 		curl_setopt_array ( $handle, $options );
 		$output = ( string ) curl_exec ( $handle );
 		if (curl_errno ( $handle )) {
 			Logger::error ( 'Could not retrive the count of new messages. Error: ' . curl_error ( $handle ) );
+			return 0;
 		}
 		curl_close ( $handle );
-
+		
 		if (Utils::IsNullOrEmptyString ( $output )) {
-			Logger::error ( 'Empty response received from Gmail. Output: "' . $output. '"');
+			Logger::error ( 'Empty response received from Gmail. Output: "' . $output . '"' );
 			return 0;
 		}
-
+		// Suppress libxml warnings, so we can handle them ourselves
+		libxml_use_internal_errors ( true );
+		
+		// Parce the output
 		$xml = simplexml_load_string ( $output );
 		if ($xml === FALSE) {
-			Logger::error ( 'Could not parse XML output. Output: "' . $xml.'"' );
+			// Retrieve last error from libxml
+			$errors = libxml_get_errors ();
+			
+			foreach ( $errors as $error ) {
+				// Log all errors
+				XmlUtils::LogXmlError ( $error, $xml );
+			}
+			// Clear libxml error buffer
+			libxml_clear_errors ();
 			return 0;
 		}
-
+		
 		// Count the new messages
 		$unseenMessagesCount = 0;
 		foreach ( $xml->entry as $entry ) {
 			Logger::debug ( "New message with subject '" . ( string ) $entry->title . "' counted." );
 			$unseenMessagesCount ++;
 		}
-
+		
 		if ($unseenMessagesCount > 0) {
 			Logger::debug ( "The count of new messages is " . $unseenMessagesCount );
 		} else {
@@ -69,15 +83,15 @@ class Gmail extends IncomingBase {
 	}
 	public function getNewMessageData() {
 		Logger::info ( "Getting New Message Data from GMAIL account " . $this->connectionData->username );
-
+		
 		$messageDataList = array ();
 		try {
 			$this->connect ();
 			$emails = $this->getUnseenMessages ();
-
+			
 			if ($emails) {
 				$output = '';
-
+				
 				// put the newest emails on top
 				rsort ( $emails );
 				foreach ( $emails as $emailNumber ) {
@@ -87,9 +101,9 @@ class Gmail extends IncomingBase {
 					$recipient = $overview [0]->to;
 					$subject = $overview [0]->subject;
 					$body = $this->getPlainMessageBody ( $this->imapFolder, $emailNumber );
-
+					
 					Logger::debug ( "\r\n\tSender: " . $sender . "\r\n\tRecipient: " . $recipient . "\r\n\tSubject: " . $subject . "\r\n\tBody: " . $body );
-
+					
 					$messageData = new MessageData ( $sender, $recipient, $subject, $body );
 					array_push ( $messageDataList, $messageData );
 				}
@@ -122,7 +136,7 @@ class Gmail extends IncomingBase {
 		if (Utils::IsNullOrEmptyString ( $this->connectionData->folder )) {
 			$this->connectionData->folder = "INBOX";
 		}
-
+		
 		if (Utils::IsNullOrEmptyString ( $this->connectionData->hostname )) {
 			$this->connectionData->hostname = self::GMAIL_IMAP_SERVER;
 		}
@@ -139,7 +153,7 @@ class Gmail extends IncomingBase {
 			throw new \Exception ( "Could not connect to GMAIL. Error: " . imap_last_error () );
 		}
 		$this->isConnected = TRUE;
-
+		
 		Logger::debug ( "Connected to Gmail." );
 	}
 	protected function disconnect() {
